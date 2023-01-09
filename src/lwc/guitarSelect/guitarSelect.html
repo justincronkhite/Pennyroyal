@@ -1,0 +1,53 @@
+<template>
+<lightning-card title="Choose Your Features">
+    <div class="slds-grid slds-gutters">
+        
+        <div class="slds-col">
+        <div class="slds-p-around_medium lgc-bg">
+            <lightning-combobox
+            name="Manufacturer"
+            label="Manufacturer"
+            value={selectedManufacturer}
+            placeholder="Select Manufacturer"
+            options={manufacturerOptions}
+            onchange={handleManufacturerChange}
+            
+    ></lightning-combobox>
+        </div>            
+    </div>
+        
+        <div class="slds-col">
+            <div class="slds-var-p-around_medium lgc-bg">
+                <lightning-combobox
+                name="Pickup Type"
+                label="Pickup Type"
+                value={selectedPickups}
+                placeholder="Select Pickup Type"
+                options={pickupsOptions}
+                onchange={handlePickupsChange}
+                
+                
+        ></lightning-combobox>
+            </div>
+            
+        </div>
+        <div class="slds-col">
+            <div class="slds-p-around_medium lgc-bg">
+                <lightning-combobox
+                name="Headstock Style"
+                label="Headstock Style"
+                value={selectedHeadstock}
+                placeholder="Select Headstock Style"
+                options={headstockOptions}
+                onchange={handleHeadstockChange}
+                
+        ></lightning-combobox>
+            </div>
+        </div>
+        </div>
+        
+
+</lightning-card>
+<c-guitar-table plpickup ={selectedPickups} plmanufacturer ={selectedManufacturer} plheadstock ={selectedHeadstock}></c-guitar-table>
+  
+</template>
