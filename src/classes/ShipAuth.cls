@@ -3,8 +3,11 @@
  */
 
 public with sharing class ShipAuth {
-   
-    public static String run() {
+   @Future(callout=true)
+   public static void run() {
+        Cache.OrgPartition orgPart = Cache.Org.getPartition('local.DefaultPartition');
+        String accessToken = (String)orgPart.get('token');
+        DateTime expires = (Datetime)orgPart.get('expires');
         String endpoint = 'https://login.salesforce.com/services/oauth2/token';
         String username = 'josh@ship4cheap.com';
         String password = 'hMJQPRY5O84AvUaqEhGlKjaDiBNLlFSub0zZ';
@@ -24,30 +27,42 @@ public with sharing class ShipAuth {
         ship.setEndpoint(endpoint);
 
         Http http = new Http();
-        HttpResponse response;
-                String accessToken;
+        HttpResponse responseToken;
+                //String accessToken;
 
         try {
-            response = http.send(ship);
-            System.debug('body: ' + response.getBody());
-            accessToken = parseResponseForAccessToken(response.getBody());
+            responseToken = http.send(ship);
+            System.debug('body: ' + responseToken.getBody());
+            if (responseToken.getStatusCode() == 200) {
+
+                //Deserialize response and store it in map
+                Map<String, Object> mapResultToken = (Map<String, Object>) JSON.deserializeUntyped(responseToken.getBody());
+
+                //Storing Access Token and Expiry to Org cache
+                orgPart.put('token',mapResultToken.get('access_token'));
+                orgPart.put('expires',system.now().addSeconds(3600));
+                system.debug('The AC is from ShipAuth'+mapResultToken.get('access_token'));
+                system.debug('This is from AHipAuth Cache'+orgPart.get('token'));
+
+            }
+//            accessToken = parseResponseForAccessToken(response.getBody());
         }catch(System.CalloutException error){
             System.debug('error: ' + error);
         }
-        System.debug('access token: ' + accessToken);
-        System.debug(UserInfo.getOrganizationId().substring(0, 15) + ' ' +  UserInfo.getSessionId().substring(15));
-        return accessToken;
+        //System.debug('access token: ' + accessToken);
+        //System.debug('LAst debug from Ship auth'+UserInfo.getOrganizationId().substring(0, 15) + ' ' +  UserInfo.getSessionId().substring(15));
+        //return accessToken;
     }
-    private static String parseResponseForAccessToken(String responseBody) {
-        String accessToken;
-
-        JSONParser parser = JSON.createParser(responseBody);
-        while (parser.nextToken() != null) {
-            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) && (parser.getText() == 'access_token')) {
-                parser.nextToken();
-                accessToken = parser.getText();
-            }
-        }
-        return accessToken;
-    }
+//    private static String parseResponseForAccessToken(String responseBody) {
+//        String accessToken;
+//
+//        JSONParser parser = JSON.createParser(responseBody);
+//        while (parser.nextToken() != null) {
+//            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) && (parser.getText() == 'access_token')) {
+//                parser.nextToken();
+//                accessToken = parser.getText();
+//            }
+//        }
+//        return accessToken;
+//    }
 }
