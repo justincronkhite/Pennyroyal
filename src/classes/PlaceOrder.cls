@@ -13,7 +13,7 @@ public with sharing class PlaceOrder {
         for (Opportunity opp : Opps) {
             oppId = opp.Id;
         }
-        itemsToShip = [SELECT Id, Product2Id, ProductCode, OpportunityId,
+        itemsToShip = [SELECT Id, Product2Id, ProductCode, Opportunity.Case_Safe_Id__c,
                  Product2.Inventory__c, Quantity, Product2.Name
             FROM OpportunityLineItem
             WHERE OpportunityId = :oppId];
@@ -26,13 +26,14 @@ public with sharing class PlaceOrder {
         for (OpportunityLineItem item : itemsToShip){
             if (item.Product2.Inventory__c >= item.Quantity){
                 inStock.add(item);
-                 //Do I need to do a Boolean here? Set some Variable to True?  Maybe add to another list of things that are in stock?
+                 //Do I need to do a Boolean here? Set some Variable to True?  Maybe add to another list of things that are in stock
             }else{
                 new InventoryException('There are not enough '+ item.Product2.Name+' in Stock');
             }
+
     //Call The HTTP Request feeding in the inStock List
         }
+        System.debug('Here is what is in Stock'+inStock);
+        ShipHTTP.sendItemsToShippingOrg(inStock);
     }
 }
-
-
