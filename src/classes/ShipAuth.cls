@@ -2,15 +2,16 @@
  * Created by justi on 1/9/2023.
  */
 
-public with sharing class ShipAuth {
+Global with sharing class ShipAuth {
    @Future(callout=true)
-   public static void run() {
+   global static void run() {
+       system.debug('Callout Started');
         Cache.OrgPartition orgPart = Cache.Org.getPartition('local.DefaultPartition');
         String accessToken = (String)orgPart.get('token');
         DateTime expires = (Datetime)orgPart.get('expires');
         String endpoint = 'https://login.salesforce.com/services/oauth2/token';
         String username = 'josh@ship4cheap.com';
-        String password = 'hMJQPRY5O84AvUaqEhGlKjaDiBNLlFSub0zZ';
+        String password = 'RBpKaZC54x4HwbGL0SuJwVgJTjKcNXGlmEQZV';
         String CONSUMER_KEY = '3MVG9ux34Ig8G5erv9VTKR_t22l9UksPb9tYA7wyEjydYvrnL84vU0_ILQgzVnT6jQaC0xGOfXL2z1f_yRjov';
         String CONSUMER_SECRET = '0EA8DAA7B814D491BFC1F1012250F4C95444C9B6D1EEC07FAEE8AC833E756ED1';
 

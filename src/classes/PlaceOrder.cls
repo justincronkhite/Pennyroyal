@@ -3,37 +3,41 @@
  */
 
 public with sharing class PlaceOrder {
+    private static Cache.OrgPartition orgPart = Cache.Org.getPartition('local.DefaultPartition');
+    private static String accessToken = (String) orgPart.get('token');
+    private static Datetime expires = (Datetime) orgPart.get('expires');
+    private static List <Opportunity> opportunities = new List <Opportunity>();
+    public static Id oppId;
+    public static Boolean stockCheck = true;
+    public static void startTransaction(List<Opportunity> opps) {
 
-    private static Id oppId;
-    private static List <OpportunityLineItem> itemsToShip = new List <OpportunityLineItem>();
-
-    //Get the opportunity Line items from the Opportunity
-    public static void getLineItems(List <Opportunity> Opps){
-        //Get the Opportunity Id
-        for (Opportunity opp : Opps) {
+        for (Opportunity opp : opps) {
             oppId = opp.Id;
         }
-        itemsToShip = [SELECT Id, Product2Id, ProductCode, Opportunity.Case_Safe_Id__c,
-                 Product2.Inventory__c, Quantity, Product2.Name
-            FROM OpportunityLineItem
-            WHERE OpportunityId = :oppId];
-        checkInventory();
-    }
+       //stockCheck = PrepareItemsToShip.getLineItems(oppId);
+        System.debug('oppid'+ oppId);
 
-    public static void checkInventory() {
-        List <OpportunityLineItem> inStock = new List <OpportunityLineItem>();
-        //Check inventory of products
-        for (OpportunityLineItem item : itemsToShip){
-            if (item.Product2.Inventory__c >= item.Quantity){
-                inStock.add(item);
-                 //Do I need to do a Boolean here? Set some Variable to True?  Maybe add to another list of things that are in stock
-            }else{
-                new InventoryException('There are not enough '+ item.Product2.Name+' in Stock');
-            }
+        opportunities = opps;
+         checkAuthentication();
 
-    //Call The HTTP Request feeding in the inStock List
+        if (stockCheck == true ){
+
         }
-        System.debug('Here is what is in Stock'+inStock);
-        ShipHTTP.sendItemsToShippingOrg(inStock);
+        ShipHTTP.sendItemsToPenny(oppId);
+
     }
+
+    public static void checkAuthentication() {
+
+        if (String.isBlank(accessToken) || expires == null || expires < System.now()) {
+            ShipAuth.run();
+        }
+
+    }
+
+
+
 }
+
+
+
